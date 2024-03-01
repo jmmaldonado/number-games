@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Fun!</title>
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+
+<body>
+    <div id="header" class="header">
+        <h1> 
+            <a href="../index.html" style="text-decoration: none; margin-left: 10px;" id="button-home">🏠</a>
+            Let's add
+        </h1>
+        <div class="header-right">
+            <div id="correctAnswers">✅<span id="correct-score-value">0</span></div>
+            <div id="wrongAnswers"><span style="filter: hue-rotate(210deg);">❎</span><span
+                    id="wrong-score-value">0</span></div>
+            <div>
+                <select id="difficulty-level">
+                    <option value="2" selected>Level 2</option>
+                    <option value="3">Level 3</option>
+                    <option value="4">Level 4</option>
+                    <option value="5">Level 5</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+    <div id="game-container">
+        <div id="problem"></div>
+        <div id="answers">
+            <button class="button-84" id="option1"></button>
+            <button class="button-84" id="option2"></button>
+            <button class="button-84" id="option3"></button>
+        </div>
+        <div id="feedback"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

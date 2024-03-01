@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kids Counter Game</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" type="text/css" href="style.css?v=4">
+</head>
+
+<body>
+    <div class="header">
+        <h1>
+            <a href="../index.html" style="text-decoration: none; margin-left: 10px;" id="button-home">🏠</a>
+            Let's Count!
+        </h1>
+        <div class="dropdown">
+            <select id="language-select">
+                <option value="en-US">🇺🇸</option>
+                <option value="es-ES">🇪🇸</option>
+            </select>
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="counter-container">
+            <div id="counter">0</div>
+        </div>
+
+        <div class="controls">
+            <div class="column column-left">
+                <div class="control-button" data-value="-1">-1</div>
+                <div class="control-button" data-value="-10">-10</div>
+                <div class="control-button" data-value="-100">-100</div>
+                <div class="control-button" data-value="-1000">-1000</div>
+
+            </div>
+            <div class="column column-right">
+                <div class="control-button" data-value="1">+1</div>
+                <div class="control-button" data-value="10">+10</div>
+                <div class="control-button" data-value="100">+100</div>
+                <div class="control-button" data-value="1000">+1000</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

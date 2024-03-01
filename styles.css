@@ -1,0 +1,181 @@
+html,
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f1fafc;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    height: 100%;
+}
+
+
+/**************************
+     HEADER ELEMENTS 
+**************************/
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e6f4f9;
+    border-bottom: 5px solid hsl(204, 70%, 53%);
+    padding: 0px 0px;
+    border-radius: 0 0 15px 15px;
+    color: hsl(204, 79%, 40%)
+}
+
+.header h1 {
+    margin-left: 20px;
+}
+
+.header-right {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin-right: 10px;
+    margin-top: -4px;
+}
+
+.header button {
+    font-size: 48px;
+    margin-right: 20px;
+    border: 0;
+    background-color: transparent;
+    margin-left: 20px ;
+}
+
+
+#game-board {
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: repeat(12, 0fr); /* 12 columns */
+    grid-template-rows: repeat(8, 0fr);  /* 8 rows */
+    box-sizing: border-box; 
+}
+
+ .tile {
+
+    width: 70px; 
+    height: 90px;  
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    padding: 2px;
+    background-color: rgb(240,240,240);
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 10px 15px 18px rgba(0,0,0,0.9) ;
+}
+
+.tile-empty {
+    border: 1px solid transparent;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.tile-number {
+    font-size: 30px;
+    font-weight: bold;
+    color: black;;
+}
+
+.selected {
+    background-color: rgb(206, 238, 193);
+}
+
+.hint {
+    background-color: rgb(231, 158, 232);
+}
+
+
+
+.shape-container {
+    position: relative; /* Position shapes within the container */
+    width: 95%;
+    height: 95%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;  
+    justify-content: center;
+    align-items: center; 
+    gap: 5px;
+}
+
+
+.row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/**************************
+     FOOTER ELEMENTS 
+**************************/
+.footer {
+    position: absolute;
+    bottom: 0;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e6f4f9;
+    border-top: 5px solid hsl(204, 70%, 53%);
+    padding: 0px 20px;
+    box-sizing: border-box;
+    color: hsl(204, 79%, 40%);
+    display: flex;
+    flex-direction: row;
+}
+
+.footer div {
+    
+    align-items: baseline;
+    margin-top: 5px;
+    font-size: 36px;
+}
+
+#remaining-tiles {
+    font-size: 48px;
+    margin-right: 10px;
+    font-family: 'Maria', sans-serif;
+    color: hsl(204, 79%, 40%)
+}
+
+
+select {
+    /* Reset */
+    appearance: none;
+    border: 1px solid hsl(204, 79%, 40%);
+    outline: 0;
+    font: inherit;
+    /* Personalize */
+    width: 20rem;
+    font-size: 36px;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    background: var(--arrow-icon) no-repeat right 0.8em center / 1.4em,
+      linear-gradient(to left, var(--arrow-bg) 3em, var(--select-bg) 3em);
+    color: hsl(204, 79%, 40%);
+    border-radius: 0.25em;
+    box-shadow: 0 0 0em 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    /* Remove IE arrow */
+    &::-ms-expand {
+      display: none;
+    }
+    /* Remove focus outline */
+    &:focus {
+      outline: none;
+    }
+    /* <option> colors */
+    option {
+      color: inherit;
+      background-color: var(--option-bg);
+    }
+  }
