@@ -69,7 +69,7 @@ function speak(phrase) {
     utterance.pitch = 1
     utterance.lang = "en-EN";
     speechSynthesis.speak(utterance);
-    setTimeout(generateNumbers, 5000)
+    setTimeout(generateNumbers, 3000)
 }
 
 function updateScoreUI() {
