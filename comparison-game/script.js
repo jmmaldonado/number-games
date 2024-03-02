@@ -28,7 +28,6 @@ generateNumbers();
 
 function handleAnswerClick() {
     let phrase = ""
-    console.log("answer")
     if (enabledButtons) {
         enabledButtons = false
 
