@@ -27,10 +27,12 @@ body {
     border-bottom: 5px solid hsl(204, 70%, 53%);
     padding: 0px 0px;
     border-radius: 0 0 15px 15px;
-    color: hsl(204, 79%, 40%)
+    color: hsl(204, 79%, 40%);
+    width: 100%;
+    margin-bottom: 20px;
 }
 
-.header h1 {
+.header h2 {
     margin-left: 20px;
 }
 
@@ -59,8 +61,8 @@ body {
     align-items: center;
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid blue;
-    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+    border: 1px solid hsl(204, 70%, 53%);
+    box-shadow: 2px 2px 2px 1px hsla(204, 70%, 20%, 0.2);
 }
 
 a {

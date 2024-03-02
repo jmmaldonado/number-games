@@ -16,13 +16,9 @@ body {
     height: 100%;
 }
 
-h1 {
-    color: #3498db;
-    font-size: 5vw;
-    margin-bottom: 0;
-    margin-top: 0;
-    padding-left: 20px;
 
+.header h2 {
+    margin-left: 00px;
 }
 
 #counter {
@@ -45,11 +41,13 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     background-color: #e6f4f9;
-    border-bottom: 5px solid #3498db;
+    border-bottom: 5px solid hsl(204, 70%, 53%);
     padding: 0px 0px;
     border-radius: 0 0 15px 15px;
+    color: hsl(204, 79%, 40%);
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .dropdown {
