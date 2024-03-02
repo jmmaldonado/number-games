@@ -14,12 +14,36 @@
             <a href="../index.html" style="text-decoration: none; margin-left: 10px;" id="button-home">🏠</a>
             Comparison game
         </h1>
+        <div class="header-right">
+            <div id="correctAnswers">✅<span id="correct-score-value">0</span></div>
+            <div id="wrongAnswers"><span style="filter: hue-rotate(210deg);">❎</span><span
+                    id="wrong-score-value">0</span></div>
+            <div>
+                <select id="difficulty-level">
+                    <option value="2" selected>Level 2</option>
+                    <option value="3">Level 3</option>
+                    <option value="4">Level 4</option>
+                    <option value="5">Level 5</option>
+                </select>
+            </div>
+
+        </div>
     </div>
+
     <div id="game-container">
-        <div id="number1" class="number clickable"></div>
-        <h2 id="instruction">Bigger</h2> 
-        <div id="number2" class="number clickable"></div>
+        <div id="placeholders">
+            <div id="number1" draggable="true" class="number unselectable">10</div>
+            <div id="operation">
+                <img id="operationImg" data-operation="greaterThan" width="150" src="greaterThan.png" />
+            </div>
+            <div id="number2" class="number unselectable">25</div>
+        </div>
+        <div id="controls">
+            <button id="buttonAnswer" class="button-84" onclick="handleAnswerClick()">Check answer</button>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
+
 </html>
