@@ -66,7 +66,7 @@ body.dark-mode {
 .header-right {
     display: flex;
     align-items: center;
-    gap: 2em; /* 2em gap between game-stats and theme-switcher */
+    gap: 0.8em; /* 2em gap between game-stats and theme-switcher */
 }
 
 #game-stats {
@@ -146,28 +146,34 @@ body.dark-mode {
 }
 
 .cell.incorrect {
-    background-color: #ffdddd;
     color: red;
+    font-weight: bold;
 }
 
 .cell .draft-grid {
-    display: none;
+    display: grid;
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
+    box-sizing: border-box;
+    padding: 2px;
 }
 
 .cell.draft-active .draft-grid {
-    display: grid;
+    /* This style is now handled by the default .cell .draft-grid rule */
 }
 
 .draft-cell {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     color: var(--text-color);
-    opacity: 0.7;
-    text-align: center;
+    opacity: 0.8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #number-palette {
@@ -194,6 +200,14 @@ body.dark-mode {
     cursor: pointer;
 }
 
+#number-palette button.active-draft-button {
+    background-image: none;
+    background-color: var(--selected-cell-bg);
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.4);
+    border-color: #000;
+    color: #fff;
+}
+
 #complexity,
 #difficulty {
     padding: 0.5rem 1rem;
@@ -209,13 +223,14 @@ body.dark-mode {
 #controls-bar button#show-solution,
 #controls-bar button#hint,
 #controls-bar button#undo,
-#controls-bar button#redo {
+#controls-bar button#redo,
+#theme-switcher {
     background: none; /* Make background transparent */
     background-color: transparent; /* Ensure transparency */
     color: var(--text-color); /* Use text color for icons */
     font-size: 2rem; /* Make icons bigger for touchscreens */
     padding: 0.25rem 0.5rem; /* Adjust padding for larger icons */
-    border: 1px solid var(--cell-border); /* Add a subtle border */
+    border: 0px solid var(--cell-border); /* Add a subtle border */
 }
 
 #number-palette button:disabled, #controls-bar button:disabled {
@@ -244,6 +259,42 @@ body.dark-mode {
     padding: 2rem;
     border-radius: 10px;
     position: relative;
+}
+
+.celebration-content {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #fff;
+    text-align: center;
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    animation: fadeInScale 0.5s ease-out forwards;
+}
+
+.celebration-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 0.8s infinite alternate;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-10px);
+    }
 }
 
 .close-button {

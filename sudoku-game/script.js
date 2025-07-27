@@ -18,11 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsModal = document.getElementById('stats-modal'); // Keep for now, but it's hidden
     const closeStatsBtn = statsModal.querySelector('.close-button'); // Keep for now, but it's hidden
     const statsBody = document.getElementById('stats-body'); // Keep for now, but it's hidden
+    const celebrationModal = document.getElementById('celebration-modal');
+    const closeCelebrationModalBtn = document.getElementById('close-celebration-modal');
+    const finalTimeElement = document.getElementById('final-time');
 
     // Game State
     let size = 9;
     let difficulty = 'medium';
     let board = [];
+    let initialBoard = [];
     let solution = [];
     let selectedCell = null;
     let timerInterval = null;
@@ -30,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let time = 0;
     let undoStack = [];
     let redoStack = [];
+    let isDraftMode = false;
+    let drafts = [];
 
     // --- CORE GAME LOGIC ---
 
@@ -37,9 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array(size * size).fill(0);
     }
 
-    function isValid(board, row, col, num) {
+    function isValid(currentBoard, row, col, num) {
         for (let i = 0; i < size; i++) {
-            if (board[row * size + i] === num || board[i * size + col] === num) {
+            if (currentBoard[row * size + i] === num && i !== col) {
+                return false;
+            }
+            if (currentBoard[i * size + col] === num && i !== row) {
                 return false;
             }
         }
@@ -49,7 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const startCol = col - col % subgridSize;
         for (let i = 0; i < subgridSize; i++) {
             for (let j = 0; j < subgridSize; j++) {
-                if (board[(startRow + i) * size + (startCol + j)] === num) {
+                const cellIndex = (startRow + i) * size + (startCol + j);
+                if (currentBoard[cellIndex] === num && cellIndex !== (row * size + col)) {
                     return false;
                 }
             }
@@ -119,6 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         removeNumbers(tempBoard);
         board = tempBoard;
+        initialBoard = [...board];
+        drafts = Array(size * size).fill(null).map(() => []);
+        selectedCell = null;
         
         undoStack = [];
         redoStack = [];
@@ -130,16 +143,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderBoard() {
+        const selectedIndex = selectedCell ? parseInt(selectedCell.dataset.index) : -1;
         boardElement.innerHTML = '';
         boardElement.className = `size-${size}`;
         for (let i = 0; i < size * size; i++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
             cell.dataset.index = i;
-            if (board[i] !== 0) {
+
+            if (initialBoard[i] !== 0) {
                 cell.textContent = board[i];
                 cell.classList.add('fixed');
+            } else if (board[i] !== 0) {
+                cell.textContent = board[i];
+            } else if (drafts[i] && drafts[i].length > 0) {
+                const draftGrid = document.createElement('div');
+                draftGrid.className = 'draft-grid';
+                for (let k = 1; k <= size; k++) {
+                    const draftCell = document.createElement('div');
+                    draftCell.className = 'draft-cell';
+                    if (drafts[i].includes(k)) {
+                        draftCell.textContent = k;
+                    }
+                    draftGrid.appendChild(draftCell);
+                }
+                cell.appendChild(draftGrid);
             }
+            
             // Add thick borders for subgrids
             const subgridSize = Math.sqrt(size);
             const row = Math.floor(i / size);
@@ -151,6 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.style.borderBottom = '3px solid var(--text-color)';
             }
             boardElement.appendChild(cell);
+        }
+
+        if (selectedIndex !== -1) {
+            selectedCell = boardElement.querySelector(`[data-index='${selectedIndex}']`);
+            if (selectedCell) {
+                selectedCell.classList.add('selected');
+                if (isDraftMode) {
+                    selectedCell.classList.add('draft-active');
+                }
+            }
         }
     }
 
@@ -170,16 +210,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 numberPaletteRow1.appendChild(btn); // For 4x4, all in one row
             }
         }
+        
+        const draftBtn = document.createElement('button');
+        draftBtn.id = 'draft-mode-btn';
+        draftBtn.textContent = '✏️';
+        draftBtn.addEventListener('click', toggleDraftMode);
+
+        const clearBtn = document.createElement('button');
+        clearBtn.textContent = '🗑️';
+        clearBtn.addEventListener('click', clearCell);
+
         if (size === 9) {
-            const draftBtn = document.createElement('button');
-            draftBtn.textContent = '✏️';
-            draftBtn.addEventListener('click', toggleDraftMode);
             numberPaletteRow2.appendChild(draftBtn);
+            numberPaletteRow2.appendChild(clearBtn);
         } else {
-            const draftBtn = document.createElement('button');
-            draftBtn.textContent = '✏️';
-            draftBtn.addEventListener('click', toggleDraftMode);
             numberPaletteRow1.appendChild(draftBtn);
+            numberPaletteRow1.appendChild(clearBtn);
         }
     }
 
@@ -189,81 +235,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (selectedCell) {
             selectedCell.classList.remove('selected');
+            selectedCell.classList.remove('draft-active');
         }
         selectedCell = target;
         selectedCell.classList.add('selected');
+        if (isDraftMode) {
+            selectedCell.classList.add('draft-active');
+        }
+    }
+
+    function clearCell() {
+        if (!selectedCell || selectedCell.classList.contains('fixed')) return;
+
+        const index = parseInt(selectedCell.dataset.index);
+        const prevBoardValue = board[index];
+        const prevDrafts = [...drafts[index]];
+
+        if (prevBoardValue === 0 && prevDrafts.length === 0) return; // Nothing to clear
+
+        pushToUndo({ index, boardValue: prevBoardValue, draftValues: prevDrafts, type: 'clear' });
+
+        board[index] = 0;
+        drafts[index] = [];
+
+        renderBoard();
+        saveGameState();
     }
 
     function handleNumberInput(num) {
         if (!selectedCell || selectedCell.classList.contains('fixed')) return;
 
         const index = parseInt(selectedCell.dataset.index);
-        const prevValue = board[index];
-        
-        if (selectedCell.classList.contains('draft-active')) {
-            // Draft mode logic - does not affect undo stack
-            let draftGrid = selectedCell.querySelector('.draft-grid');
-            if (!draftGrid) {
-                draftGrid = document.createElement('div');
-                draftGrid.className = 'draft-grid';
-                for(let i=1; i<=size; i++) {
-                    const draftCell = document.createElement('div');
-                    draftCell.className = 'draft-cell';
-                    draftCell.dataset.num = i;
-                    draftGrid.appendChild(draftCell);
-                }
-                selectedCell.appendChild(draftGrid);
-            }
-            const draftCell = draftGrid.querySelector(`[data-num='${num}']`);
-            if (draftCell.textContent) {
-                draftCell.textContent = '';
-            } else {
-                draftCell.textContent = num;
-            }
-            selectedCell.querySelector('span:not(.draft-cell)')?.remove();
-            if (board[index] !== 0) {
-                pushToUndo({ index, value: prevValue });
-                board[index] = 0;
-            }
+        const prevBoardValue = board[index];
+        const prevDrafts = [...drafts[index]];
 
+        if (isDraftMode) {
+            const draftIndex = drafts[index].indexOf(num);
+            if (draftIndex > -1) {
+                drafts[index].splice(draftIndex, 1);
+            } else {
+                drafts[index].push(num);
+            }
+            board[index] = 0; // Clear final number if drafting
+            pushToUndo({ index, boardValue: prevBoardValue, draftValues: prevDrafts, type: 'draft' });
         } else {
             // Normal input mode
-            if (selectedCell.querySelector('.draft-grid')) {
-                selectedCell.querySelector('.draft-grid').remove();
-            }
-            pushToUndo({ index, value: prevValue });
-            selectedCell.textContent = num;
+            drafts[index] = [];
             board[index] = num;
+            pushToUndo({ index, boardValue: prevBoardValue, draftValues: prevDrafts, type: 'final' });
         }
+        
+        renderBoard();
         saveGameState();
+        checkIfBoardIsFilled();
     }
 
     function toggleDraftMode() {
-        const draftBtn = numberPaletteElement.querySelector('button:last-child');
+        isDraftMode = !isDraftMode;
+        const draftBtn = document.getElementById('draft-mode-btn');
+        draftBtn.classList.toggle('active-draft-button');
+
+        // Update visual state of the selected cell
         if (selectedCell) {
-            selectedCell.classList.toggle('draft-active');
-        }
-        // Also toggle a class on the button itself for visual feedback
-        if (selectedCell && selectedCell.classList.contains('draft-active')) {
-            draftBtn.style.backgroundColor = 'var(--draft-mode-bg)';
-        } else {
-            draftBtn.style.backgroundColor = '';
+            if (isDraftMode) {
+                selectedCell.classList.add('draft-active');
+            } else {
+                selectedCell.classList.remove('draft-active');
+            }
         }
     }
 
     // --- GAME ACTIONS ---
 
-    function checkAnswer() {
+    function checkAnswer(autoValidate = false) {
+        let hasIncorrectCells = false;
         for (let i = 0; i < size * size; i++) {
             const cell = boardElement.querySelector(`[data-index='${i}']`);
+            const row = Math.floor(i / size);
+            const col = i % size;
+            const num = board[i];
+
             if (!cell.classList.contains('fixed')) {
-                if (board[i] !== 0 && board[i] !== solution[i]) {
+                if (num !== 0 && (!isValid(board, row, col, num) || num !== solution[i])) {
                     cell.classList.add('incorrect');
+                    hasIncorrectCells = true;
                 } else {
                     cell.classList.remove('incorrect');
                 }
             }
         }
+
+        const isBoardCompletelyFilled = isBoardFilled();
+
+        if (autoValidate && isBoardCompletelyFilled && !hasIncorrectCells) {
+            showCelebration();
+        }
+        return !hasIncorrectCells;
     }
 
     function showSolution() {
@@ -289,11 +356,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (hintIndex !== -1) {
-            pushToUndo({ index: hintIndex, value: board[hintIndex] });
+            const prevBoardValue = board[hintIndex];
+            const prevDrafts = [...drafts[hintIndex]];
+            pushToUndo({ index: hintIndex, boardValue: prevBoardValue, draftValues: prevDrafts, type: 'hint' });
+            
             board[hintIndex] = solution[hintIndex];
+            drafts[hintIndex] = []; // Clear drafts in hinted cell
+            
             renderBoard();
             saveGameState();
+            checkIfBoardIsFilled();
         }
+    }
+
+    function isBoardFilled() {
+        return board.every(cellValue => cellValue !== 0);
+    }
+
+    function checkIfBoardIsFilled() {
+        if (isBoardFilled()) {
+            checkAnswer(true); // Pass true to indicate auto-validation
+        }
+    }
+
+    function showCelebration() {
+        clearInterval(timerInterval);
+        const minutes = Math.floor(time / 60).toString().padStart(2, '0');
+        const seconds = (time % 60).toString().padStart(2, '0');
+        finalTimeElement.textContent = `${minutes}:${seconds}`;
+        celebrationModal.classList.remove('hidden');
     }
 
     // --- TIMER AND SCORE ---
@@ -318,8 +409,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function undo() {
         if (undoStack.length === 0) return;
         const lastMove = undoStack.pop();
-        redoStack.push({ index: lastMove.index, value: board[lastMove.index] });
-        board[lastMove.index] = lastMove.value;
+        const { index, boardValue, draftValues } = lastMove;
+
+        const currentBoardValue = board[index];
+        const currentDraftValues = [...drafts[index]];
+
+        redoStack.push({ index, boardValue: currentBoardValue, draftValues: currentDraftValues });
+
+        board[index] = boardValue;
+        drafts[index] = draftValues;
+        
         renderBoard();
         updateUndoRedoButtons();
     }
@@ -327,8 +426,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function redo() {
         if (redoStack.length === 0) return;
         const lastRedo = redoStack.pop();
-        undoStack.push({ index: lastRedo.index, value: board[lastRedo.index] });
-        board[lastRedo.index] = lastRedo.value;
+        const { index, boardValue, draftValues } = lastRedo;
+
+        const currentBoardValue = board[index];
+        const currentDraftValues = [...drafts[index]];
+
+        undoStack.push({ index, boardValue: currentBoardValue, draftValues: currentDraftValues });
+
+        board[index] = boardValue;
+        drafts[index] = draftValues;
+
         renderBoard();
         updateUndoRedoButtons();
     }
@@ -342,13 +449,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveGameState() {
         const gameState = {
             board,
+            initialBoard,
             solution,
             size,
             difficulty,
             time,
             score,
             undoStack,
-            redoStack
+            redoStack,
+            drafts
         };
         localStorage.setItem('sudokuGameState', JSON.stringify(gameState));
     }
@@ -358,13 +467,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedState) {
             const gameState = JSON.parse(savedState);
             board = gameState.board;
+            initialBoard = gameState.initialBoard || [...gameState.board];
             solution = gameState.solution;
             size = gameState.size;
             difficulty = gameState.difficulty;
             time = gameState.time;
             score = gameState.score;
-            undoStack = gameState.undoStack;
-            redoStack = gameState.redoStack;
+            undoStack = gameState.undoStack || [];
+            redoStack = gameState.redoStack || [];
+            drafts = gameState.drafts || Array(size * size).fill(null).map(() => []);
             return true;
         }
         return false;
@@ -385,15 +496,29 @@ document.addEventListener('DOMContentLoaded', () => {
         generateSudoku();
     });
 
+    complexitySelect.addEventListener('change', () => {
+        size = parseInt(complexitySelect.value);
+        generateSudoku();
+    });
+
+    difficultySelect.addEventListener('change', () => {
+        difficulty = difficultySelect.value;
+        generateSudoku();
+    });
+
     themeSwitcherBtn.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         themeSwitcherBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
     });
 
     closeStatsBtn.addEventListener('click', () => statsModal.classList.add('hidden'));
+    closeCelebrationModalBtn.addEventListener('click', () => celebrationModal.classList.add('hidden'));
     window.addEventListener('click', (e) => {
         if (e.target === statsModal) {
             statsModal.classList.add('hidden');
+        }
+        if (e.target === celebrationModal) {
+            celebrationModal.classList.add('hidden');
         }
     });
 
@@ -407,8 +532,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUndoRedoButtons();
             startTimer(); // Resumes timer from saved time
         } else {
-            size = parseInt(complexitySelect.value);
-            difficulty = difficultySelect.value;
+            size = 4; // Always start in 4x4
+            difficulty = 'hard'; // Always start in hard mode
+            complexitySelect.value = size;
+            difficultySelect.value = difficulty;
             generateSudoku();
         }
     }
